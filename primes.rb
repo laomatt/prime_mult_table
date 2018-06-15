@@ -99,7 +99,7 @@ end
 end
 
 # print input form the command line or the default 10 if not argument given
-print_primes_original(ARGV[0].nil? ? 10 : ARGV[0].to_i)
+print_primes_original(ARGV[0].nil? ? 10 : ARGV[0].to_i, ARGV[2] == 'silent' ? true : false )
 
 # but the test code actually found that this took about twice as long, probably because of the adding operation
 
