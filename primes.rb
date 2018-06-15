@@ -102,7 +102,6 @@ end
 print_primes_original(ARGV[0].nil? ? 10 : ARGV[0].to_i, ARGV[2] == 'silent' ? true : false )
 
 # but the test code actually found that this took about twice as long, probably because of the adding operation
-
 # measuring the time it takes to process each method
 if ARGV[1] == 'test'
 	sample_input = ARGV[0].to_i
