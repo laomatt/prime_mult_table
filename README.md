@@ -27,5 +27,5 @@ I also made use of the Benchmark library to compare the times it took to run, yo
 "The optimized solution performs worse."
 ```
 
-The 'silent' keyword will prevent the table being tested from being outputed to the screen and only reported the time difference between the two.
+The 'silent' keyword will prevent the table being tested from being printed to the screen and only report the time difference between the two.
 

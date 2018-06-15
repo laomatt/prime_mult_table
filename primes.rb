@@ -9,7 +9,7 @@ class Integer
 	end
 
 	def is_prime?
-		2.upto(self-1) do |j|
+		2.upto(self.abs-1) do |j|
 			return false if self.is_multiple_of?(j)
 		end
 		return true
@@ -80,6 +80,10 @@ end
 	raise "Wrong answer:  #{pr} should be prime"  if !pr.is_prime?
 end
 
+
+[4,60,120,-4,9,20,0].each do |pr|
+	raise "Wrong answer:  #{pr} should NOT be prime"  if pr.is_prime?
+end
 
 # test various list sizes
 [1,2,10,20,40,50].each do |n|
