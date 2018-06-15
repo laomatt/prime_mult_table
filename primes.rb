@@ -9,6 +9,7 @@ class Integer
 	end
 
 	def is_prime?
+		return false if self == 0
 		2.upto(self.abs-1) do |j|
 			return false if self.is_multiple_of?(j)
 		end
