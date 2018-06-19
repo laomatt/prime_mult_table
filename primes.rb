@@ -1,5 +1,4 @@
-require 'benchmark'
-require 'bigdecimal/math'
+require_relative 'time_trial'
 
 class Integer
 	# To make things a little cleaner to read, I usually add things to the Integer class to minimize 'loose' methods and extra inputs
@@ -15,22 +14,42 @@ class Integer
 		end
 		return true
 	end
-end
 
+	# avoiding making an instance method optimizes the time
+	def is_prime_opt?
+		return false if self == 0
+		2.upto(self.abs-1) do |j|
+			return false if self%j == 0
+		end
+		return true
+	end
+end
 
 def find_primes(n)
 	out = []
 	i = 1
 
-	while out.length < n
+	while out.length < n.to_i
 		out << i if i.is_prime?
 		i+=1
 	end
 	out
 end
 
+def find_primes_optimized(n)
+	out = []
+	i = 1
 
-def print_primes_original(n,test=false)
+
+	while out.length < n.to_i
+		out << i if i.is_prime_opt?
+		i+=1
+	end
+	out
+end
+
+
+def print_primes(n,test=false)
 	primes = find_primes(n)
 
 	# Offset the table cell based on the size of the largest number, to make it look nice.
@@ -50,30 +69,52 @@ def gen_row(primes,prime,offset)
 end
 
 
-def print_primes_optimized(n,test=false)
-	primes = find_primes(n)
+def print_primes_optimized_1(n,test=false)
+	# primes = find_primes(n)
+	primes = find_primes_optimized(n)
 
-	# offset the table cell based on the size of the largest number
+	# Offset the table cell based on the size of the largest number, to make it look nice.
 	largest_num = primes.last**2
 	offset = largest_num.to_s.length
-	cache = {}
+	
 
-	primes.each do |prime|prime - prime%10
-
-		if cache[prime%10] && cache[prime-prime%10]
-			# the idea here was to cache processed rows so we can add them instead of reprocessing if we come across a prime number that is a sum or two already processed primes
-			prime_prod = [cache[prime%10], cache[prime-prime%10]].transpose.map {|x| x.reduce(:+)}
-		else
-			prime_prod = primes.map { |e| (e*prime) }
-		end
-
-		cache[prime] = prime_prod
-
-		# here is to keep my primes consistent
-		raise 'error' if !(prime_prod.map { |e| e.to_s.ljust(offset.to_f)  }.join('  ') == gen_row(primes,prime,offset)) && test
-		p "  " + prime_prod.map { |e| e.to_s.ljust(offset.to_f)  }.join('  ') + "  " if !test
+	primes.each do |prime|
+		row = gen_row(primes,prime,offset)
+		p "  " + row + "  " if !test
 	end
 end
+
+
+ def print_primes_optimized_0(n,test=false)
+     # primes = find_primes(n)
+     primes = find_primes_optimized(n)
+     # offset the table cell based on the size of the largest number
+     # Offset the table cell based on the size of the largest number, to make t look nice.
+     largest_num = primes.last**2
+     offset = largest_num.to_s.length
+     cache = {}
+
+     primes.each do |prime|prime - prime%10
+
+       if cache[prime%10] && cache[prime-prime%10]
+               # the idea here was to cache processed rows so we can add them instead of reprocessing if we come across a prime number that is a sum or wo already processed primes
+              prime_prod = [cache[prime%10], cache[prime-prime%10]].ranspose.map {|x| x.reduce(:+)}
+       else
+               prime_prod = primes.map { |e| (e*prime) }
+       end
+
+       cache[prime] = prime_prod
+
+       # here is to keep my primes consistent
+       raise 'error' if !(prime_prod.map { |e| e.to_s.ljust(offset.to_f) }.join('  ') == gen_row(primes,prime,offset)) && test
+       p "  " + prime_prod.map { |e| e.to_s.ljust(offset.to_f)  }.join(' ') + "  " if !test
+			 primes.each do |prime|
+         row = gen_row(primes,prime,offset)
+         p "  " + row + "  " if !test
+      end
+      # p 'df'
+    end
+ end
 
 
 # test the is_prime method
@@ -104,25 +145,27 @@ end
 end
 
 # print input form the command line or the default 10 if not argument given
-print_primes_original(ARGV[0].nil? ? 10 : ARGV[0].to_i, ARGV[2] == 'silent' ? true : false )
+# print_primes(ARGV[0].nil? ? 10 : ARGV[0].to_i, ARGV[2] == 'silent' ? true : false )
 
-# but the test code actually found that this took about twice as long, probably because of the adding operation
-# measuring the time it takes to process each method
 if ARGV[1] == 'test'
-	sample_input = ARGV[0].to_i
-	original = Benchmark.measure { print_primes_original(sample_input,true) }.total
-	optimized = Benchmark.measure { print_primes_optimized(sample_input,true) }.total
-	p "Original: #{original}"
-	p "Optimized: #{optimized}"
-	diff = original - optimized
-	p "Time difference: #{diff}"
-	if diff < 0
-		p "The optimized solution performs worse."
-	elsif diff > 0
-		p 'The optimized solution performs better.'
-	else
-		p 'There is no difference in time.'
-	end
+	# sample_input = 300
+	sample_input = ARGV[0] 
+	time = TimeTrial.new('optimized')
+	puts time.time_test('print_primes',{
+				:trials => 10, 
+				:sample_input => [sample_input,true], 
+				:test_cases => [0,1]
+			}
+		)
+
+	puts time.time_test('find_primes',{
+				:trials => 10, 
+				:sample_input => [sample_input]
+			}
+		)
 end
+
+
+
 
 
