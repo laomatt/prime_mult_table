@@ -40,7 +40,6 @@ def find_primes_optimized(n)
 	out = []
 	i = 1
 
-
 	while out.length < n.to_i
 		out << i if i.is_prime_opt?
 		i+=1

@@ -6,6 +6,32 @@ class TimeTrial
 		@lookfor = lookfor
 	end
 
+	def compare_methods(method,trials,sample_input,version,object=nil)
+		orig_sum = 0
+		opt_sum = 0
+		if object
+			trials.times do
+				orig_sum += Benchmark.measure { object.send(method.to_sym,*sample_input) }.total
+				if @lookfor
+					opt_sum += Benchmark.measure { object.send("#{method}_#{@lookfor}#{ version ? '_' : '' }#{version}".to_sym,*sample_input) }.total
+				else
+					opt_sum += Benchmark.measure { object.send("#{method}#{ version ? '_' : '' }#{version}".to_sym,*sample_input) }.total
+				end
+			end
+		else
+			trials.times do 
+				orig_sum += Benchmark.measure { send(method.to_sym,*sample_input) }.total
+				if @lookfor
+					opt_sum += Benchmark.measure { send("#{method}_#{@lookfor}#{ version ? '_' : '' }#{version}".to_sym,*sample_input) }.total
+				else
+					opt_sum += Benchmark.measure { send("#{method}#{ version ? '_' : '' }#{version}".to_sym,*sample_input) }.total
+				end
+			end
+		end
+
+		[orig_sum,opt_sum]
+	end
+
 
 	def time_test(method,options={})
 			if options[:trials]
@@ -33,35 +59,14 @@ class TimeTrial
 			end
 
 			message = "\n"
-			message += " --- #{method} report --- \n"
+			message += " --------------- #{method} report --------------- \n"
 
 
 
 			if options[:test_cases]
 				options[:test_cases].each do |version|
-					message += " --- #{method}_#{version} --- \n"
-					orig_sum = 0
-					opt_sum = 0
-					if object
-						trials.times do 
-							orig_sum += Benchmark.measure { object.send(method.to_sym,*sample_input) }.total
-							if @lookfor
-								opt_sum += Benchmark.measure { object.send("#{method}_#{@lookfor}_#{version}".to_sym,*sample_input) }.total
-							else
-								opt_sum += Benchmark.measure { object.send("#{method}_#{version}".to_sym,*sample_input) }.total
-							end
-						end
-					else
-						trials.times do 
-							orig_sum += Benchmark.measure { send(method.to_sym,*sample_input) }.total
-							if @lookfor
-								opt_sum += Benchmark.measure { send("#{method}_#{@lookfor}_#{version}".to_sym,*sample_input) }.total
-							else
-								opt_sum += Benchmark.measure { send("#{method}_#{version}".to_sym,*sample_input) }.total
-							end
-						end
-					end
-
+					message += " --------------- #{method}_#{version} --------------- \n"
+					orig_sum,opt_sum = compare_methods(method,10,sample_input,version,object)
 					original = orig_sum/trials
 					optimized = opt_sum/trials
 
@@ -82,20 +87,7 @@ class TimeTrial
 				end
 
 			else
-				orig_sum = 0
-				opt_sum = 0
-				if object
-					trials.times do 
-						orig_sum += Benchmark.measure { object.send(method.to_sym,*sample_input) }.total
-						opt_sum += Benchmark.measure { object.send("#{method}_#{@lookfor}".to_sym,*sample_input) }.total
-					end
-				else
-					trials.times do 
-						orig_sum += Benchmark.measure { send(method.to_sym,*sample_input) }.total
-						opt_sum += Benchmark.measure { send("#{method}_#{@lookfor}".to_sym,*sample_input) }.total
-					end
-				end
-
+				orig_sum,opt_sum = compare_methods(method,10,sample_input,nil,object)
 				original = orig_sum/trials
 				optimized = opt_sum/trials
 
